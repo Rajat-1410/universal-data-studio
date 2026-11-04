@@ -19,6 +19,47 @@ st.set_page_config(
 SessionManager.init_session()
 inject_custom_css()
 
+# Polyfill modern ECMAScript Array methods for compatibility with older browsers
+try:
+    if hasattr(st, "html"):
+        st.html(
+            """
+            <script>
+            (function() {
+                if (typeof Array.prototype.toSorted !== 'function') {
+                    Array.prototype.toSorted = function(compareFn) {
+                        var copy = this.slice();
+                        return copy.sort(compareFn);
+                    };
+                }
+                if (typeof Array.prototype.toReversed !== 'function') {
+                    Array.prototype.toReversed = function() {
+                        var copy = this.slice();
+                        return copy.reverse();
+                    };
+                }
+                if (typeof Array.prototype.toSpliced !== 'function') {
+                    Array.prototype.toSpliced = function() {
+                        var copy = this.slice();
+                        Array.prototype.splice.apply(copy, arguments);
+                        return copy;
+                    };
+                }
+                if (typeof Array.prototype.with !== 'function') {
+                    Array.prototype.with = function(index, value) {
+                        var copy = this.slice();
+                        copy[index] = value;
+                        return copy;
+                    };
+                }
+            })();
+            </script>
+            """,
+            unsafe_allow_javascript=True,
+        )
+except Exception:
+    pass
+
 # Define sidebar navigation pages corresponding to all 12 requested architecture sections
 pages = {
     "Overview": [
