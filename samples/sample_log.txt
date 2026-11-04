@@ -1,0 +1,7 @@
+Timestamp|Level|Service|Message|ResponseTimeMs
+2026-11-03 08:00:12|INFO|AuthService|User login successful user_id=4021|12
+2026-11-03 08:01:45|WARN|PaymentGateway|Latency threshold exceeded gateway_id=stripe|420
+2026-11-03 08:02:10|INFO|OrderService|Order placed order_id=ORD-9912|85
+2026-11-03 08:03:33|ERROR|InventoryService|Stock allocation failed for SKU-8841|110
+2026-11-03 08:05:00|INFO|BillingService|Invoice generated inv_id=INV-4412|35
+2026-11-03 08:06:21|INFO|AuditLogger|Daily batch reconciliation complete|2540

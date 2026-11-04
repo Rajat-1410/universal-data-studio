@@ -1,0 +1,58 @@
+{
+  "workflow_id": "preset_crm_sanitization",
+  "name": "\ud83d\udcc7 CRM Contact Sanitation & Validation",
+  "description": "Title-cases customer names, cleans whitespaces, fills missing cities, and verifies uniqueness.",
+  "version": "1.0.0",
+  "created_at": "2026-11-04 14:54:27",
+  "updated_at": "2026-11-04 14:54:27",
+  "tags": [
+    "crm",
+    "customers",
+    "contacts"
+  ],
+  "steps": [
+    {
+      "step_id": "step_p3_1",
+      "name": "TitleCase Customer Names",
+      "category": "data_cleaning",
+      "operation": "standardize_text",
+      "params": {
+        "columns": [
+          "CustomerName"
+        ],
+        "operations": [
+          "trim",
+          "titlecase"
+        ]
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p3_2",
+      "name": "Impute Missing City with 'Unassigned'",
+      "category": "data_cleaning",
+      "operation": "impute_missing",
+      "params": {
+        "columns": [
+          "City"
+        ],
+        "strategy": "constant",
+        "constant_value": "Unassigned"
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p3_3",
+      "name": "Eliminate Duplicate Customers by ID",
+      "category": "row_ops",
+      "operation": "remove_duplicates",
+      "params": {
+        "subset_cols": [
+          "CustomerID"
+        ],
+        "keep_mode": "first"
+      },
+      "enabled": true
+    }
+  ]
+}

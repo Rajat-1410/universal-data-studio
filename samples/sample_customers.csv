@@ -1,0 +1,11 @@
+ID,Name,RegistrationDate,Balance,Country,IsActive
+101,John Doe,2026-01-05,250.0,USA,True
+102,Jane Smith,06/01/2026,1420.5,Canada,True
+103,Bob Jones,2026-01-07,,UK,False
+104,Alice Brown,08-01-2026,89.9,Germany,True
+105,Charlie Davis,2026-01-09,5400.0,USA,True
+106,Eva White,10/01/2026,310.2,France,False
+107,Frank Miller,2026-01-11,75.0,Japan,True
+108,Grace Hopper,2026-01-12,,USA,True
+109,Alan Turing,13-01-2026,92000.0,UK,True
+109,Alan Turing,13-01-2026,92000.0,UK,True

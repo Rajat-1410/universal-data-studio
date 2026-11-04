@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ENVELOPE>
+  <HEADER>
+    <TALLYREQUEST>Import Data</TALLYREQUEST>
+  </HEADER>
+  <BODY>
+    <IMPORTDATA>
+      <REQUESTDESC>
+        <REPORTNAME>Vouchers</REPORTNAME>
+        <STATICVARIABLES>
+          <SVCURRENTCOMPANY>National Trading Co.</SVCURRENTCOMPANY>
+        </STATICVARIABLES>
+      </REQUESTDESC>
+      <REQUESTDATA>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER REMOTEID="NTC-2026-001" VCHKEY="KEY001" VCHTYPE="Sales" ACTION="Create">
+            <DATE>20260401</DATE>
+            <GUID>7a3c8e92-1b4d-4e5f-9a1c-000000000001</GUID>
+            <VOUCHERTYPENAME>Sales</VOUCHERTYPENAME>
+            <VOUCHERNUMBER>SALES/26-27/001</VOUCHERNUMBER>
+            <PARTYLEDGERNAME>Apex Solutions Pvt Ltd</PARTYLEDGERNAME>
+            <BASICBUYERNAME>Apex Solutions Pvt Ltd</BASICBUYERNAME>
+            <NARRATION>Sales of IT Equipment - Bill 001</NARRATION>
+            <ALTERID>1001</ALTERID>
+            <MASTERID>5001</MASTERID>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Apex Solutions Pvt Ltd</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+              <AMOUNT>-59000.00</AMOUNT>
+              <BILLALLOCATIONS.LIST>
+                <NAME>SALES/26-27/001</NAME>
+                <BILLTYPE>New Ref</BILLTYPE>
+                <AMOUNT>-59000.00</AMOUNT>
+              </BILLALLOCATIONS.LIST>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Sales - Hardware</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>50000.00</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Output IGST 18%</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>9000.00</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER REMOTEID="NTC-2026-002" VCHKEY="KEY002" VCHTYPE="Sales" ACTION="Create">
+            <DATE>20260402</DATE>
+            <GUID>7a3c8e92-1b4d-4e5f-9a1c-000000000002</GUID>
+            <VOUCHERTYPENAME>Sales</VOUCHERTYPENAME>
+            <VOUCHERNUMBER>SALES/26-27/002</VOUCHERNUMBER>
+            <PARTYLEDGERNAME>BlueStar Technologies</PARTYLEDGERNAME>
+            <BASICBUYERNAME>BlueStar Technologies</BASICBUYERNAME>
+            <NARRATION>Annual Support Contract renewal</NARRATION>
+            <ALTERID>1002</ALTERID>
+            <MASTERID>5002</MASTERID>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>BlueStar Technologies</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+              <AMOUNT>-23600.00</AMOUNT>
+              <BILLALLOCATIONS.LIST>
+                <NAME>SALES/26-27/002</NAME>
+                <BILLTYPE>New Ref</BILLTYPE>
+                <AMOUNT>-23600.00</AMOUNT>
+              </BILLALLOCATIONS.LIST>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Service Income</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>20000.00</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Output CGST 9%</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>1800.00</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Output SGST 9%</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>1800.00</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER REMOTEID="NTC-2026-003" VCHKEY="KEY003" VCHTYPE="Receipt" ACTION="Create">
+            <DATE>20260403</DATE>
+            <GUID>7a3c8e92-1b4d-4e5f-9a1c-000000000003</GUID>
+            <VOUCHERTYPENAME>Receipt</VOUCHERTYPENAME>
+            <VOUCHERNUMBER>REC/26-27/001</VOUCHERNUMBER>
+            <PARTYLEDGERNAME>Apex Solutions Pvt Ltd</PARTYLEDGERNAME>
+            <NARRATION>NEFT payment received</NARRATION>
+            <ALTERID>1003</ALTERID>
+            <MASTERID>5003</MASTERID>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>HDFC Bank Current A/c</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+              <AMOUNT>-59000.00</AMOUNT>
+              <BANKALLOCATIONS.LIST>
+                <INSTRUMENTNUMBER>NEFT982341</INSTRUMENTNUMBER>
+                <TRANSACTIONTYPE>Inter Bank Transfer</TRANSACTIONTYPE>
+                <AMOUNT>-59000.00</AMOUNT>
+              </BANKALLOCATIONS.LIST>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Apex Solutions Pvt Ltd</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>59000.00</AMOUNT>
+              <BILLALLOCATIONS.LIST>
+                <NAME>SALES/26-27/001</NAME>
+                <BILLTYPE>Agst Ref</BILLTYPE>
+                <AMOUNT>59000.00</AMOUNT>
+              </BILLALLOCATIONS.LIST>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER REMOTEID="NTC-2026-004" VCHKEY="KEY004" VCHTYPE="Payment" ACTION="Create">
+            <DATE>20260404</DATE>
+            <GUID>7a3c8e92-1b4d-4e5f-9a1c-000000000004</GUID>
+            <VOUCHERTYPENAME>Payment</VOUCHERTYPENAME>
+            <VOUCHERNUMBER>PMT/26-27/001</VOUCHERNUMBER>
+            <PARTYLEDGERNAME>Office Rent Expenses</PARTYLEDGERNAME>
+            <NARRATION>Office rent for April 2026</NARRATION>
+            <ALTERID>1004</ALTERID>
+            <MASTERID>5004</MASTERID>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Office Rent Expenses</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+              <AMOUNT>-45000.00</AMOUNT>
+              <COSTCENTREALLOCATIONS.LIST>
+                <NAME>Head Office Mumbai</NAME>
+                <AMOUNT>-45000.00</AMOUNT>
+              </COSTCENTREALLOCATIONS.LIST>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>HDFC Bank Current A/c</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>45000.00</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>
+      </REQUESTDATA>
+    </IMPORTDATA>
+  </BODY>
+</ENVELOPE>

@@ -1,0 +1,67 @@
+{
+  "catalog_name": "Global Hardware Inventory",
+  "exported_at": "2026-11-03T12:00:00Z",
+  "total_categories": 3,
+  "items": [
+    {
+      "item_id": "ITM-001",
+      "name": "Precision Server Rack 42U",
+      "category": "Infrastructure",
+      "stock": 14,
+      "cost": 1250.0,
+      "tags": [
+        "server",
+        "rack",
+        "datacenter"
+      ]
+    },
+    {
+      "item_id": "ITM-002",
+      "name": "Optical Transceiver 100G",
+      "category": "Networking",
+      "stock": 85,
+      "cost": 320.5,
+      "tags": [
+        "optics",
+        "fiber",
+        "highspeed"
+      ]
+    },
+    {
+      "item_id": "ITM-003",
+      "name": "Managed Switch 48-Port",
+      "category": "Networking",
+      "stock": 22,
+      "cost": 2100.0,
+      "tags": [
+        "switch",
+        "cisco",
+        "poe"
+      ]
+    },
+    {
+      "item_id": "ITM-004",
+      "name": "UPS Power Backup 3000VA",
+      "category": "Power",
+      "stock": 7,
+      "cost": 1780.0,
+      "tags": [
+        "ups",
+        "battery",
+        "redundancy"
+      ]
+    },
+    {
+      "item_id": "ITM-005",
+      "name": "Enterprise NVMe SSD 3.84TB",
+      "category": "Storage",
+      "stock": 42,
+      "cost": 490.0,
+      "tags": [
+        "nvme",
+        "storage",
+        "fast"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "workflow_id": "preset_audit_dedup",
+  "name": "\ud83e\uddf9 Comprehensive Audit & Deduplicate",
+  "description": "Normalizes text, standardizes date formats, eliminates duplicates, and sorts records cleanly.",
+  "version": "1.0.0",
+  "created_at": "2026-11-04 14:54:27",
+  "updated_at": "2026-11-04 14:54:27",
+  "tags": [
+    "audit",
+    "cleaning",
+    "deduplication"
+  ],
+  "steps": [
+    {
+      "step_id": "step_p1_1",
+      "name": "Trim & Normalize All Text Fields",
+      "category": "data_cleaning",
+      "operation": "standardize_text",
+      "params": {
+        "operations": [
+          "trim",
+          "remove_extra_spaces"
+        ]
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p1_2",
+      "name": "Standardize Primary Date Column",
+      "category": "data_cleaning",
+      "operation": "standardize_dates",
+      "params": {
+        "column": "OrderDate",
+        "target_format": "%Y-%m-%d"
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p1_3",
+      "name": "Remove Duplicate Records Across All Columns",
+      "category": "row_ops",
+      "operation": "remove_duplicates",
+      "params": {
+        "subset_cols": null,
+        "keep_mode": "first"
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p1_4",
+      "name": "Verify Non-Empty Dataset",
+      "category": "validation",
+      "operation": "assert_min_rows",
+      "params": {
+        "min_rows": 1
+      },
+      "enabled": true
+    }
+  ]
+}

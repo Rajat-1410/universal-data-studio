@@ -1,0 +1,73 @@
+{
+  "workflow_id": "preset_sales_tax_calc",
+  "name": "\ud83d\udcca Sales Tax Calculation & Regional Aggregation",
+  "description": "Cleans currency amounts, calculates GST/VAT (18%), standardizes regions, and aggregates by region.",
+  "version": "1.0.0",
+  "created_at": "2026-11-04 14:54:27",
+  "updated_at": "2026-11-04 14:54:27",
+  "tags": [
+    "sales",
+    "tax",
+    "aggregation"
+  ],
+  "steps": [
+    {
+      "step_id": "step_p2_1",
+      "name": "Clean Numeric Amount Formatting",
+      "category": "data_cleaning",
+      "operation": "clean_numeric_formatting",
+      "params": {
+        "columns": [
+          "Amount"
+        ],
+        "strip_symbols": true,
+        "decimal_separator": ".",
+        "round_decimals": 2
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p2_2",
+      "name": "Calculate Amount With Tax (18%)",
+      "category": "column_ops",
+      "operation": "calculate_column",
+      "params": {
+        "target_col": "TotalWithTax",
+        "formula": "[Amount] * 1.18"
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p2_3",
+      "name": "Uppercase Region Names",
+      "category": "data_cleaning",
+      "operation": "standardize_text",
+      "params": {
+        "columns": [
+          "Region"
+        ],
+        "operations": [
+          "trim",
+          "uppercase"
+        ]
+      },
+      "enabled": true
+    },
+    {
+      "step_id": "step_p2_4",
+      "name": "Group & Aggregate Total by Region",
+      "category": "transformations",
+      "operation": "group_and_aggregate",
+      "params": {
+        "group_by_cols": [
+          "Region"
+        ],
+        "agg_spec": {
+          "Amount": "sum",
+          "TotalWithTax": "sum"
+        }
+      },
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<TRANSACTIONS version="2.4" source="ERP_System">
+  <HEADER>
+    <TIMESTAMP>2026-11-03T10:30:00</TIMESTAMP>
+    <ORGANIZATION>Global Enterprises Ltd</ORGANIZATION>
+  </HEADER>
+  <RECORDLIST>
+    <RECORD id="REC-1001" type="INVOICE">
+      <VOUCHERNUMBER>INV-2026-101</VOUCHERNUMBER>
+      <DATE>2026-02-01</DATE>
+      <PARTYNAME>Client Corp A</PARTYNAME>
+      <AMOUNT>1750.5</AMOUNT>
+      <LINEITEMS>
+        <ITEM line="1">
+          <DESCRIPTION>Service Package 1</DESCRIPTION>
+          <RATE>500</RATE>
+          <QUANTITY>1</QUANTITY>
+        </ITEM>
+        <ITEM line="2">
+          <DESCRIPTION>Service Package 2</DESCRIPTION>
+          <RATE>1000</RATE>
+          <QUANTITY>2</QUANTITY>
+        </ITEM>
+      </LINEITEMS>
+    </RECORD>
+    <RECORD id="REC-1002" type="INVOICE">
+      <VOUCHERNUMBER>INV-2026-102</VOUCHERNUMBER>
+      <DATE>2026-02-02</DATE>
+      <PARTYNAME>Client Corp B</PARTYNAME>
+      <AMOUNT>3250.5</AMOUNT>
+      <LINEITEMS>
+        <ITEM line="1">
+          <DESCRIPTION>Service Package 1</DESCRIPTION>
+          <RATE>500</RATE>
+          <QUANTITY>1</QUANTITY>
+        </ITEM>
+        <ITEM line="2">
+          <DESCRIPTION>Service Package 2</DESCRIPTION>
+          <RATE>1000</RATE>
+          <QUANTITY>2</QUANTITY>
+        </ITEM>
+      </LINEITEMS>
+    </RECORD>
+    <RECORD id="REC-1003" type="INVOICE">
+      <VOUCHERNUMBER>INV-2026-103</VOUCHERNUMBER>
+      <DATE>2026-02-03</DATE>
+      <PARTYNAME>Client Corp C</PARTYNAME>
+      <AMOUNT>4750.5</AMOUNT>
+      <LINEITEMS>
+        <ITEM line="1">
+          <DESCRIPTION>Service Package 1</DESCRIPTION>
+          <RATE>500</RATE>
+          <QUANTITY>1</QUANTITY>
+        </ITEM>
+        <ITEM line="2">
+          <DESCRIPTION>Service Package 2</DESCRIPTION>
+          <RATE>1000</RATE>
+          <QUANTITY>2</QUANTITY>
+        </ITEM>
+      </LINEITEMS>
+    </RECORD>
+    <RECORD id="REC-1004" type="INVOICE">
+      <VOUCHERNUMBER>INV-2026-104</VOUCHERNUMBER>
+      <DATE>2026-02-04</DATE>
+      <PARTYNAME>Client Corp D</PARTYNAME>
+      <AMOUNT>6250.5</AMOUNT>
+      <LINEITEMS>
+        <ITEM line="1">
+          <DESCRIPTION>Service Package 1</DESCRIPTION>
+          <RATE>500</RATE>
+          <QUANTITY>1</QUANTITY>
+        </ITEM>
+        <ITEM line="2">
+          <DESCRIPTION>Service Package 2</DESCRIPTION>
+          <RATE>1000</RATE>
+          <QUANTITY>2</QUANTITY>
+        </ITEM>
+      </LINEITEMS>
+    </RECORD>
+    <RECORD id="REC-1005" type="INVOICE">
+      <VOUCHERNUMBER>INV-2026-105</VOUCHERNUMBER>
+      <DATE>2026-02-05</DATE>
+      <PARTYNAME>Client Corp E</PARTYNAME>
+      <AMOUNT>7750.5</AMOUNT>
+      <LINEITEMS>
+        <ITEM line="1">
+          <DESCRIPTION>Service Package 1</DESCRIPTION>
+          <RATE>500</RATE>
+          <QUANTITY>1</QUANTITY>
+        </ITEM>
+        <ITEM line="2">
+          <DESCRIPTION>Service Package 2</DESCRIPTION>
+          <RATE>1000</RATE>
+          <QUANTITY>2</QUANTITY>
+        </ITEM>
+      </LINEITEMS>
+    </RECORD>
+  </RECORDLIST>
+</TRANSACTIONS>
