@@ -150,11 +150,15 @@ class XmlReader(BaseReader):
     """Universal hierarchical XML reader and inspector."""
 
     def read(self, filename: str, raw_bytes: bytes, record_tag: Optional[str] = None, **kwargs) -> Dict[str, Any]:
-        enc = FormatDetector.detect_encoding(raw_bytes)
-        text = raw_bytes.decode(enc, errors="replace")
-
-        # Parse XML tree
-        root = ET.fromstring(text)
+        try:
+            from modules.tally.tally_reader import TallyReader
+            root, text = TallyReader.decode_and_sanitize_xml(raw_bytes)
+            enc = FormatDetector.detect_encoding(raw_bytes)
+        except Exception:
+            enc = FormatDetector.detect_encoding(raw_bytes)
+            text = raw_bytes.decode(enc, errors="replace")
+            # Parse XML tree
+            root = ET.fromstring(text)
 
         # Inspect hierarchical structure
         structure_info = self._analyze_xml_tree(root)

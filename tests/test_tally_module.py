@@ -215,3 +215,82 @@ def test_tally_exporter_outputs(original_tally_xml, revised_excel_df):
     assert "Voucher_Balances" in excel_file.sheet_names
     assert "Ledger_Modifications" in excel_file.sheet_names
     assert "Reconciliation_Diff" in excel_file.sheet_names
+
+
+def test_tally_reader_utf16_and_bom():
+    """Verify TallyReader handles UTF-16, BOMs, unescaped ampersands, and multi-root messages."""
+    # 1. UTF-16 with BOM and unescaped ampersands
+    raw_utf16_xml = (
+        '<?xml version="1.0" encoding="utf-16"?>\n'
+        '<ENVELOPE>\n'
+        '  <HEADER><VERSION>1</VERSION></HEADER>\n'
+        '  <BODY>\n'
+        '    <DATA>\n'
+        '      <TALLYMESSAGE xmlns:UDF="TallyUDF">\n'
+        '        <COMPANY>M/S ABC & Sons</COMPANY>\n'
+        '        <VOUCHER VCHTYPE="Receipt">\n'
+        '          <DATE>20260501</DATE>\n'
+        '          <VOUCHERNUMBER>RCT-001</VOUCHERNUMBER>\n'
+        '          <ALLLEDGERENTRIES.LIST>\n'
+        '            <LEDGERNAME>AXIS BANK & CO</LEDGERNAME>\n'
+        '            <AMOUNT>-55450.00</AMOUNT>\n'
+        '            <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>\n'
+        '          </ALLLEDGERENTRIES.LIST>\n'
+        '        </VOUCHER>\n'
+        '      </TALLYMESSAGE>\n'
+        '    </DATA>\n'
+        '  </BODY>\n'
+        '</ENVELOPE>'
+    ).encode("utf-16")
+
+    parsed = TallyReader.parse_tally_xml(raw_utf16_xml)
+    assert parsed["company_name"] == "M/S ABC &amp; Sons" or "ABC" in parsed["company_name"]
+    assert parsed["total_vouchers"] == 1
+    assert parsed["vouchers"][0]["voucher_number"] == "RCT-001"
+    assert parsed["vouchers"][0]["ledger_entries"][0]["amount"] == -55450.00
+
+    # 2. Multi-root TALLYMESSAGE blocks without ENVELOPE
+    multi_root = (
+        '<TALLYMESSAGE><VOUCHER VCHTYPE="Payment"><VOUCHERNUMBER>P1</VOUCHERNUMBER></VOUCHER></TALLYMESSAGE>'
+        '<TALLYMESSAGE><VOUCHER VCHTYPE="Receipt"><VOUCHERNUMBER>R1</VOUCHERNUMBER></VOUCHER></TALLYMESSAGE>'
+    )
+    parsed_multi = TallyReader.parse_tally_xml(multi_root)
+    assert parsed_multi["total_vouchers"] == 2
+
+
+def test_voucher_matcher_debit_credit_and_blank_vch_num(original_tally_xml):
+    """Verify VoucherMatcher handles separate Debit/Credit columns and blank Voucher No using VoucherType + Date."""
+    parsed = TallyReader.parse_tally_xml(original_tally_xml)
+
+    # DataFrame resembling user's uploaded template: Voucher No is None, separate Debit/Credit columns
+    revised_template_df = pd.DataFrame([
+        {
+            "Voucher Date": "2026-04-01 00:00:00",
+            "Voucher No": None,
+            "Voucher Type": "Sales",
+            "Ledger Name": "Apex Solutions Pvt Ltd",
+            "Debit": 70800.00,
+            "Credit": 0.0,
+        },
+        {
+            "Voucher Date": "2026-04-01 00:00:00",
+            "Voucher No": None,
+            "Voucher Type": "Sales",
+            "Ledger Name": "Domestic Sales 18%",
+            "Debit": 0.0,
+            "Credit": 60000.00,
+        },
+    ])
+
+    match_res = VoucherMatcher.match_vouchers(
+        tally_vouchers=parsed["vouchers"],
+        revised_df=revised_template_df,
+        match_by="VoucherType + Date",
+    )
+
+    stats = match_res["stats"]
+    assert stats["matched_exact"] == 1
+    assert stats["modified"] == 1
+    v1_reconciled = match_res["reconciled_vouchers"][0]
+    assert v1_reconciled["tally_voucher"]["voucher_number"] == "SALES/26-27/001"
+

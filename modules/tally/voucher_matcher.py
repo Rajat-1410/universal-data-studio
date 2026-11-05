@@ -12,6 +12,20 @@ class VoucherMatcher:
     """Reconciles vouchers between Tally XML and revised Excel datasets."""
 
     @classmethod
+    def _normalize_date_str(cls, d_val: Any) -> str:
+        """Normalizes dates from various formats (YYYYMMDD, YYYY-MM-DD, DD/MM/YYYY, Timestamp) to YYYYMMDD."""
+        if d_val is None or pd.isna(d_val):
+            return ""
+        s = str(d_val).strip()
+        if " " in s:
+            s = s.split(" ")[0].strip()
+        try:
+            dt = pd.to_datetime(d_val)
+            return dt.strftime("%Y%m%d")
+        except Exception:
+            return re.sub(r"[-/.]", "", s)
+
+    @classmethod
     def match_vouchers(
         cls,
         tally_vouchers: List[Dict[str, Any]],
@@ -40,31 +54,82 @@ class VoucherMatcher:
         resolved_ledger_col = ledger_col or col_map_lower.get("ledgername") or col_map_lower.get("ledger") or col_map_lower.get("account") or col_map_lower.get("particulars")
         resolved_amt_col = amount_col or col_map_lower.get("revisedamount") or col_map_lower.get("amount") or col_map_lower.get("newamount") or col_map_lower.get("total")
 
+        # Support separate Debit and Credit columns when single Amount column is absent
+        resolved_debit_col = col_map_lower.get("debit") or col_map_lower.get("dr") or col_map_lower.get("debitamount")
+        resolved_credit_col = col_map_lower.get("credit") or col_map_lower.get("cr") or col_map_lower.get("creditamount")
+
+        revised_df_work = revised_df.copy()
+        if not resolved_amt_col and (resolved_debit_col or resolved_credit_col):
+            def _calc_amt(row):
+                dr = 0.0
+                cr = 0.0
+                if resolved_debit_col and pd.notna(row.get(resolved_debit_col)):
+                    try:
+                        dr = float(row[resolved_debit_col])
+                    except (ValueError, TypeError):
+                        dr = 0.0
+                if resolved_credit_col and pd.notna(row.get(resolved_credit_col)):
+                    try:
+                        cr = float(row[resolved_credit_col])
+                    except (ValueError, TypeError):
+                        cr = 0.0
+                if dr != 0.0:
+                    return abs(dr)
+                elif cr != 0.0:
+                    return -abs(cr)
+                return 0.0
+
+            revised_df_work["_calculated_amount"] = revised_df_work.apply(_calc_amt, axis=1)
+            resolved_amt_col = "_calculated_amount"
+
         if not resolved_ledger_col:
             raise ValueError("Could not find a Ledger Name column in revised Excel. Please specify ledger column.")
         if not resolved_amt_col:
-            raise ValueError("Could not find an Amount column in revised Excel. Please specify amount column.")
+            raise ValueError("Could not find an Amount or Debit/Credit column in revised Excel. Please specify amount column.")
+
+        # Check if resolved_vch_col actually has non-null, non-empty, non-'none' values
+        has_vch_nums = False
+        if resolved_vch_col:
+            vch_s = revised_df_work[resolved_vch_col].dropna().astype(str).str.strip().str.lower()
+            valid_vch_count = vch_s[~vch_s.isin(["", "none", "nan", "null"])].count()
+            has_vch_nums = valid_vch_count > 0
+
+        resolved_vch_type_col = col_map_lower.get("vouchertype") or col_map_lower.get("vouchertypename") or col_map_lower.get("type")
 
         # Determine effective match strategy
         if match_by == "Auto":
-            if resolved_guid_col and revised_df[resolved_guid_col].dropna().nunique() > 0:
+            if resolved_guid_col and revised_df_work[resolved_guid_col].dropna().nunique() > 0:
                 effective_match_by = "GUID"
-            elif resolved_vch_col:
+            elif resolved_vch_col and has_vch_nums:
                 effective_match_by = "VoucherNumber"
+            elif resolved_date_col and resolved_vch_type_col:
+                effective_match_by = "VoucherType + Date"
+            elif resolved_date_col:
+                effective_match_by = "Date + Ledger"
             else:
-                raise ValueError("Could not find GUID or VoucherNumber column in revised Excel for matching.")
+                effective_match_by = "VoucherNumber"
         else:
             effective_match_by = match_by
 
         # Build Tally Lookup Index
         tally_index: Dict[str, List[Dict[str, Any]]] = {}
-        for v in tally_vouchers:
+        for idx, v in enumerate(tally_vouchers):
             if effective_match_by == "GUID":
                 k = str(v["guid"]).strip()
             elif effective_match_by == "VoucherNumber + Date":
-                k = f"{str(v['voucher_number']).strip().upper()}|{str(v['date']).strip()}"
+                d_norm = cls._normalize_date_str(v.get("date", ""))
+                k = f"{str(v.get('voucher_number', '')).strip().upper()}|{d_norm}"
+            elif effective_match_by == "VoucherType + Date":
+                d_norm = cls._normalize_date_str(v.get("date", ""))
+                t_norm = str(v.get("voucher_type", "")).strip().upper()
+                k = f"{t_norm}|{d_norm}"
+            elif effective_match_by == "Date + Ledger":
+                d_norm = cls._normalize_date_str(v.get("date", ""))
+                first_ledger = v["ledger_entries"][0]["ledger_name"] if v.get("ledger_entries") else ""
+                l_norm = str(v.get("party_name") or first_ledger).strip().upper()
+                k = f"{d_norm}|{l_norm}"
             else:
-                k = str(v["voucher_number"]).strip().upper()
+                k = str(v.get("voucher_number", "")).strip().upper()
 
             if k:
                 if k not in tally_index:
@@ -76,13 +141,21 @@ class VoucherMatcher:
 
         # Index revised Excel rows by match key
         revised_records_by_key: Dict[str, List[Dict[str, Any]]] = {}
-        for _, row in revised_df.iterrows():
+        for _, row in revised_df_work.iterrows():
             if effective_match_by == "GUID" and resolved_guid_col:
                 k = str(row[resolved_guid_col]).strip() if pd.notna(row[resolved_guid_col]) else ""
             elif effective_match_by == "VoucherNumber + Date" and resolved_vch_col and resolved_date_col:
                 v_num = str(row[resolved_vch_col]).strip().upper() if pd.notna(row[resolved_vch_col]) else ""
-                v_date = str(row[resolved_date_col]).strip() if pd.notna(row[resolved_date_col]) else ""
-                k = f"{v_num}|{v_date}"
+                d_norm = cls._normalize_date_str(row[resolved_date_col])
+                k = f"{v_num}|{d_norm}"
+            elif effective_match_by == "VoucherType + Date" and resolved_vch_type_col and resolved_date_col:
+                t_norm = str(row[resolved_vch_type_col]).strip().upper() if pd.notna(row[resolved_vch_type_col]) else ""
+                d_norm = cls._normalize_date_str(row[resolved_date_col])
+                k = f"{t_norm}|{d_norm}"
+            elif effective_match_by == "Date + Ledger" and resolved_date_col and resolved_ledger_col:
+                d_norm = cls._normalize_date_str(row[resolved_date_col])
+                l_norm = str(row[resolved_ledger_col]).strip().upper() if pd.notna(row[resolved_ledger_col]) else ""
+                k = f"{d_norm}|{l_norm}"
             elif resolved_vch_col:
                 k = str(row[resolved_vch_col]).strip().upper() if pd.notna(row[resolved_vch_col]) else ""
             else:

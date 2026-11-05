@@ -17,15 +17,39 @@ class UniversalXmlEditor:
     """Universal XML manipulation engine preserving hierarchy and namespaces."""
 
     @classmethod
+    def safe_fromstring(cls, xml_str: str) -> ET.Element:
+        """Parses XML string safely, stripping problematic declarations, control characters, and BOMs."""
+        if not xml_str or not xml_str.strip():
+            raise ValueError("XML content is empty.")
+        clean = xml_str
+        if clean.startswith("\ufeff"):
+            clean = clean[1:]
+        clean = clean.strip()
+        if "<" in clean and not clean.startswith("<"):
+            clean = clean[clean.index("<"):]
+        if ">" in clean and not clean.endswith(">"):
+            clean = clean[:clean.rindex(">") + 1]
+        clean = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", clean)
+        clean = re.sub(r"&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)", "&amp;", clean)
+        clean = re.sub(r"<\?xml[^>]*\?>", "", clean, count=1).strip()
+        try:
+            return ET.fromstring(clean)
+        except ET.ParseError:
+            try:
+                return ET.fromstring(f"<ROOT>\n{clean}\n</ROOT>")
+            except Exception:
+                return ET.fromstring(xml_str)
+
+    @classmethod
     def validate_xml_syntax(cls, xml_str: str) -> Tuple[bool, Optional[str]]:
         """Validates XML syntax and returns error details if invalid."""
         if not xml_str or not xml_str.strip():
             return False, "XML content is empty."
         try:
-            ET.fromstring(xml_str)
+            cls.safe_fromstring(xml_str)
             return True, None
         except ET.ParseError as pe:
-            return False, f"Syntax Error (Line {pe.code}): {str(pe)}"
+            return False, f"Syntax Error: {str(pe)}"
         except Exception as e:
             return False, str(e)
 
@@ -53,7 +77,7 @@ class UniversalXmlEditor:
             return []
 
         try:
-            root = ET.fromstring(xml_str)
+            root = cls.safe_fromstring(xml_str)
         except Exception:
             return []
 
@@ -99,7 +123,7 @@ class UniversalXmlEditor:
     @classmethod
     def edit_node_text(cls, xml_str: str, target_tag: str, new_text: str, occurrence_idx: int = 0) -> Tuple[str, str]:
         """Edits text content of a specific tag occurrence."""
-        root = ET.fromstring(xml_str)
+        root = cls.safe_fromstring(xml_str)
         matched = 0
         updated = False
 
@@ -119,7 +143,7 @@ class UniversalXmlEditor:
     @classmethod
     def set_attribute(cls, xml_str: str, target_tag: str, attr_name: str, attr_value: str) -> Tuple[str, str]:
         """Adds or updates an attribute on target elements."""
-        root = ET.fromstring(xml_str)
+        root = cls.safe_fromstring(xml_str)
         clean_attr = attr_name.strip()
         if not clean_attr:
             raise ValueError("Attribute name cannot be blank.")
@@ -150,7 +174,7 @@ class UniversalXmlEditor:
         attributes: Optional[Dict[str, str]] = None,
     ) -> Tuple[str, str]:
         """Adds a new child element under specified parent element(s)."""
-        root = ET.fromstring(xml_str)
+        root = cls.safe_fromstring(xml_str)
         added_count = 0
 
         clean_new = new_tag.strip()
@@ -177,7 +201,7 @@ class UniversalXmlEditor:
     @classmethod
     def remove_element(cls, xml_str: str, target_tag: str) -> Tuple[str, str]:
         """Removes element(s) matching target_tag from XML document."""
-        root = ET.fromstring(xml_str)
+        root = cls.safe_fromstring(xml_str)
         if cls.clean_tag(root.tag) == target_tag:
             raise ValueError(f"Cannot delete the root element <{target_tag}>.")
 
@@ -202,7 +226,7 @@ class UniversalXmlEditor:
     @classmethod
     def rename_tag(cls, xml_str: str, old_tag: str, new_tag: str) -> Tuple[str, str]:
         """Renames all occurrences of an XML tag while preserving attributes and children."""
-        root = ET.fromstring(xml_str)
+        root = cls.safe_fromstring(xml_str)
         clean_new = new_tag.strip()
         if not clean_new:
             raise ValueError("New tag name cannot be blank.")
@@ -230,7 +254,7 @@ class UniversalXmlEditor:
     @classmethod
     def get_xml_structural_summary(cls, xml_str: str) -> Dict[str, Any]:
         """Returns deep structural metrics: root, total elements, max depth, repeated tags, attributes."""
-        root = ET.fromstring(xml_str)
+        root = cls.safe_fromstring(xml_str)
         total_elements = 0
         tag_counts = {}
         tag_attributes = {}
@@ -459,7 +483,7 @@ class UniversalFormatConverter:
 
     @classmethod
     def xml_to_json(cls, xml_str: str) -> str:
-        root = ET.fromstring(xml_str)
+        root = UniversalXmlEditor.safe_fromstring(xml_str)
 
         def elem_to_dict(elem: ET.Element):
             d = {}

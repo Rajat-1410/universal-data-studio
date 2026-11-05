@@ -69,7 +69,11 @@ def show():
                 key="xml_inspect_doc_sel",
             )
             raw_bytes = xml_files[selected_xml_fid]["raw_bytes"]
-            curr_xml_str = raw_bytes.decode("utf-8", errors="replace")
+            try:
+                from modules.tally.tally_reader import TallyReader
+                curr_xml_str = TallyReader.decode_and_sanitize_xml(raw_bytes)[1]
+            except Exception:
+                curr_xml_str = raw_bytes.decode("utf-8", errors="replace")
 
         if curr_xml_str:
             is_valid, err_msg = UniversalXmlEditor.validate_xml_syntax(curr_xml_str)
@@ -140,7 +144,11 @@ def show():
                 key="xml_edit_doc_sel",
             )
             raw_bytes = xml_files[edit_fid]["raw_bytes"]
-            active_xml_str = raw_bytes.decode("utf-8", errors="replace")
+            try:
+                from modules.tally.tally_reader import TallyReader
+                active_xml_str = TallyReader.decode_and_sanitize_xml(raw_bytes)[1]
+            except Exception:
+                active_xml_str = raw_bytes.decode("utf-8", errors="replace")
 
             # Extract list of available tags for friendly selection
             discovered_tags = sorted(list(set(n["tag"] for n in UniversalXmlEditor.search_nodes(active_xml_str, ""))))

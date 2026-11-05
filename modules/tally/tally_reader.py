@@ -21,6 +21,94 @@ class TallyReader:
         return tag
 
     @classmethod
+    def decode_and_sanitize_xml(cls, xml_content: Any) -> Tuple[ET.Element, str]:
+        """
+        Robustly decodes and sanitizes Tally XML from raw bytes or string.
+        Handles:
+          - Encodings: UTF-16, UTF-16-LE, UTF-16-BE, UTF-8-SIG, UTF-8, CP1252, Latin-1, ISO-8859-1
+          - Strips leading BOMs, non-XML prefixes, trailing garbage, and invalid control chars
+          - Normalizes XML declarations that conflict with Expat parser on Unicode strings
+          - Escapes unescaped ampersands (& not followed by entity name)
+          - Wraps in <ENVELOPE> if multiple root elements exist (e.g. repeated <TALLYMESSAGE>)
+        """
+        if isinstance(xml_content, bytes):
+            raw = xml_content
+            text = None
+
+            # 1. Check Byte Order Marks (BOM)
+            if raw.startswith(b"\xef\xbb\xbf"):
+                try:
+                    text = raw.decode("utf-8-sig")
+                except Exception:
+                    pass
+            elif raw.startswith(b"\xff\xfe") or raw.startswith(b"\xfe\xff"):
+                try:
+                    text = raw.decode("utf-16")
+                except Exception:
+                    pass
+
+            # 2. Check encoding attribute in XML declaration
+            if text is None:
+                m = re.search(rb"""<\?xml[^>]*encoding=['"]([^'"]+)['"]""", raw[:500])
+                if m:
+                    declared_enc = m.group(1).decode("ascii", errors="ignore").strip().lower()
+                    try:
+                        text = raw.decode(declared_enc)
+                    except Exception:
+                        pass
+
+            # 3. Try standard candidate encodings
+            if text is None:
+                for enc in ["utf-8", "utf-16", "utf-16-le", "utf-16-be", "cp1252", "latin-1", "iso-8859-1"]:
+                    try:
+                        candidate = raw.decode(enc)
+                        if "<" in candidate and ">" in candidate:
+                            text = candidate
+                            break
+                    except Exception:
+                        continue
+
+            if text is None:
+                text = raw.decode("utf-8", errors="replace")
+        else:
+            text = str(xml_content)
+
+        if not text or not text.strip():
+            raise ValueError("Tally XML content is empty.")
+
+        # Remove unicode BOM if present
+        if text.startswith("\ufeff"):
+            text = text[1:]
+        text = text.strip()
+
+        # Strip non-XML characters before first '<' and after last '>'
+        if "<" in text and not text.startswith("<"):
+            text = text[text.index("<"):]
+        if ">" in text and not text.endswith(">"):
+            text = text[:text.rindex(">") + 1]
+
+        # Clean illegal XML 1.0 control characters (preserve tab \t, newline \n, carriage return \r)
+        clean = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+
+        # Escape unescaped ampersands: & not followed by a valid entity or character reference
+        clean = re.sub(r"&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)", "&amp;", clean)
+
+        # Remove XML declaration when passing unicode str to Expat parser
+        clean = re.sub(r"<\?xml[^>]*\?>", "", clean, count=1).strip()
+
+        try:
+            root = ET.fromstring(clean)
+        except ET.ParseError as pe:
+            # Try wrapping in ENVELOPE if document has multiple root elements
+            try:
+                wrapped = f"<ENVELOPE>\n{clean}\n</ENVELOPE>"
+                root = ET.fromstring(wrapped)
+            except Exception:
+                raise ValueError(f"Invalid Tally XML syntax: {str(pe)}")
+
+        return root, text
+
+    @classmethod
     def parse_tally_xml(cls, xml_content: Any) -> Dict[str, Any]:
         """
         Parses Tally XML from bytes or string.
@@ -35,18 +123,7 @@ class TallyReader:
                 "raw_str": str
             }
         """
-        if isinstance(xml_content, bytes):
-            xml_str = xml_content.decode("utf-8", errors="replace")
-        else:
-            xml_str = str(xml_content)
-
-        if not xml_str.strip():
-            raise ValueError("Tally XML content is empty.")
-
-        try:
-            root = ET.fromstring(xml_str)
-        except ET.ParseError as pe:
-            raise ValueError(f"Invalid Tally XML syntax: {str(pe)}")
+        root, xml_str = cls.decode_and_sanitize_xml(xml_content)
 
         # Extract Company Name if available
         company_name = "Unknown Company"
